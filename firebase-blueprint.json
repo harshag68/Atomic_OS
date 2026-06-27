@@ -1,0 +1,84 @@
+{
+  "firestore": {
+    "collections": {
+      "users": {
+        "description": "User account configurations, avatar, physiology and global statistics.",
+        "schema": {
+          "email": "string",
+          "displayName": "string",
+          "photoURL": "string",
+          "createdAt": "string",
+          "avatar": {
+            "physiology": "string",
+            "name": "string",
+            "stage": "number",
+            "daysProgress": "number",
+            "lastProgressDate": "string"
+          },
+          "stats": {
+            "level": "number",
+            "xp": "number",
+            "nextLevelXp": "number",
+            "maxStreak": "number",
+            "currentStreak": "number",
+            "totalCompletions": "number",
+            "lastActiveDate": "string"
+          }
+        },
+        "subcollections": {
+          "habits": {
+            "description": "User customizable atomic habits.",
+            "schema": {
+              "id": "string",
+              "name": "string",
+              "description": "string",
+              "category": "string",
+              "streak": "number",
+              "xpReward": "number",
+              "difficulty": "string",
+              "frequency": "string",
+              "lastCompletedDate": "string",
+              "history": "array"
+            }
+          },
+          "badges": {
+            "description": "User synthesized and claimed AI milestone graphic badges.",
+            "schema": {
+              "id": "string",
+              "habitName": "string",
+              "date": "string",
+              "imageUrl": "string",
+              "promptUsed": "string",
+              "streakMilestone": "number"
+            }
+          },
+          "quests": {
+            "description": "Sync of today's daily quests progress.",
+            "schema": {
+              "id": "string",
+              "name": "string",
+              "description": "string",
+              "rewardXp": "number",
+              "completed": "boolean",
+              "progress": "number",
+              "target": "number",
+              "type": "string"
+            }
+          },
+          "logs": {
+            "description": "Individual atomic check-in logs with mood and time attributes.",
+            "schema": {
+              "id": "string",
+              "habitId": "string",
+              "habitName": "string",
+              "category": "string",
+              "date": "string",
+              "mood": "string",
+              "timeSpent": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

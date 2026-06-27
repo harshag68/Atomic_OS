@@ -1,0 +1,6 @@
+{
+  "name": "Atomic Habit Tracker",
+  "description": "A gamified full-stack habit tracker with Google Sign-In, Cloud Firestore sync, and custom companion avatars that evolve every 20 days. Features AI habit photo verification, interactive calendar timelines, an AI laboratory, and archived history logs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
