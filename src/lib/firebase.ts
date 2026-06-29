@@ -21,12 +21,12 @@ import {
 
 // Read configuration from the generated file values
 const firebaseConfig = {
-  projectId: "spheric-perigee-24dh4",
-  appId: "1:565417263169:web:447764d7c8e3096bc806c0",
-  apiKey: "AIzaSyC_f7gqBqNCDbq8Eg-YDaDMOe5_wPYWpqk",
-  authDomain: "spheric-perigee-24dh4.firebaseapp.com",
-  storageBucket: "spheric-perigee-24dh4.firebasestorage.app",
-  messagingSenderId: "565417263169",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase App
