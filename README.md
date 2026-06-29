@@ -21,10 +21,22 @@ A gamified, high-fidelity full-stack habit tracking system that turns personal c
 * **Gemini Badge Forge**: Compounding streaks allow you to forge highly detailed, glowing holographic cyberpunk achievement emblems generated specifically for your achievement milestones.
 * **Compound Formula Builder**: Synthesize multi-tier compounding habit sequences with custom reward values and difficulty curves.
 
-### 📊 Analytics & Interactive Timelines
+### 📊 Analytics, 1% Compounding & Interactive Timelines
 * **Interactive Grid Calendar**: Visualize historical completions across a unified global grid matching classic GitHub-style contribution tracking.
-* **Activity Logs & Mood Timeline**: Analyze durations, historical stats, and completed category ratios.
+* **1% Better Every Day Chart**: A visual compounding gains simulator representing James Clear's mathematical formula `(1.01)³⁶⁵ = 37.78` vs `(0.99)³⁶⁵ = 0.03` with an interactive, glowing tiny gains bar graph.
+* **7-Day Consistency Curve**: A custom-drawn SVG Bezier path chart showcasing daily habit completion frequency and duration logs over the last 7 days.
+* **Activity Logs & Mood Timeline**: Analyze focus logs, historical completion frequencies, and category metrics.
 * **Daily Missions**: Dynamic daily quests with scaling experience payouts.
+
+### 🔔 "Make It Obvious" Daily Cue Alarms
+* **Browser-Based Reminders**: Configure customizable, time-based cue alerts for each active habit.
+* **Retro Synth Sound Generator**: Triggers a unique audio check-in chime generated in real-time using the browser's standard Web Audio API (no external asset dependencies).
+* **HTML5 Desktop Notifications**: Direct desktop popups when cue alarms fire (if user permission is granted).
+* **Instant Actionable Toasts**: Active alarms display glowing overlay banners in the corner of the application screen with direct "Execute Habit" completion handshakes.
+
+### 📔 James Clear Philosophy Integration
+* **Habit Stacking Formula**: Incorporate the classic Clear structural format `After [anchor cue], I will [atomic habit]` directly below habit descriptions as obvious cue reminders.
+* **Identity-Shift Anchoring**: Link each habit to an identity statement `I am a/an [identity focus]` to prioritize who you wish to become rather than just what you want to achieve.
 
 ---
 

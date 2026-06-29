@@ -438,6 +438,72 @@ export default function HabitAnalytics({
                   </p>
                 </div>
               </div>
+
+              {/* James Clear: 1% Better Every Day Compounding Visualizer */}
+              <div className="bg-zinc-950/40 border border-zinc-850 rounded-xl p-4.5 space-y-3.5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-500">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h6 className="text-[11px] font-display font-bold uppercase tracking-wider text-zinc-200">
+                      1% Better Every Day — James Clear Philosophy
+                    </h6>
+                    <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                      Compounding Gains Formula: (1.01)³⁶⁵ = 37.78
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-zinc-400 leading-relaxed font-sans uppercase">
+                      "If you can get 1% better each day for one year, you’ll end up thirty-seven times better by the time you’re done. Conversely, if you get 1% worse each day, you’ll decline nearly down to zero."
+                    </p>
+                    <div className="text-[9px] font-mono text-orange-500/80 font-bold uppercase tracking-wider pt-1">
+                      CURRENT COMPANION EVOLUTION LEVEL: STAGE {stats.level} // LEVEL XP: {stats.xp}
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-900 flex flex-col justify-between h-24">
+                    <div className="flex justify-between items-center text-[9px] font-mono font-bold text-zinc-500 uppercase">
+                      <span>Tiny Gains Compound Curve</span>
+                      <span className="text-emerald-500">(1.01)³⁶⁵ = 37.8x</span>
+                    </div>
+
+                    {/* Miniature representation of the curve */}
+                    <div className="relative h-8 flex items-end gap-1 px-1">
+                      {[1.0, 1.1, 1.3, 1.6, 2.2, 3.1, 4.5, 7.0, 11.5, 20.0, 37.8].map((val, index) => {
+                        const barHeight = (val / 37.8) * 100;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center group/gain relative">
+                            {/* Bar */}
+                            <div 
+                              className={`w-full rounded-t-sm transition-all duration-500 ${
+                                index === 10 
+                                  ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]" 
+                                  : "bg-zinc-800 group-hover/gain:bg-zinc-600"
+                              }`}
+                              style={{ height: `${barHeight}%`, minHeight: "2px" }}
+                            />
+                            {/* Micro-tooltip */}
+                            <div className="absolute bottom-full mb-1 opacity-0 group-hover/gain:opacity-100 transition-opacity bg-zinc-900 border border-zinc-850 px-1 py-0.5 rounded text-[8px] font-mono text-zinc-300 pointer-events-none z-10 whitespace-nowrap">
+                              {val}x
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex justify-between text-[8px] font-mono font-bold text-zinc-600 uppercase tracking-widest pt-1 border-t border-zinc-900">
+                      <span>Day 1</span>
+                      <span>Day 180</span>
+                      <span>Day 365</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
 

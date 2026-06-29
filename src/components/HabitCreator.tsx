@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Habit, HabitCategory } from "../types";
-import { Plus, Sparkles, X, Brain, Dumbbell, Clock, BookOpen, AlertCircle } from "lucide-react";
+import { Plus, Sparkles, X, Brain, Dumbbell, Clock, BookOpen, AlertCircle, Bell, User2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface HabitCreatorProps {
@@ -14,6 +14,10 @@ export default function HabitCreator({ onAddHabit }: HabitCreatorProps) {
   const [category, setCategory] = useState<HabitCategory>("health");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
   const [frequency, setFrequency] = useState<"daily" | "weekly">("daily");
+  const [habitStackAnchor, setHabitStackAnchor] = useState("");
+  const [identityFocus, setIdentityFocus] = useState("");
+  const [reminderTime, setReminderTime] = useState("08:00");
+  const [reminderEnabled, setReminderEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,6 +43,10 @@ export default function HabitCreator({ onAddHabit }: HabitCreatorProps) {
       xpReward,
       difficulty,
       frequency,
+      habitStackAnchor: habitStackAnchor.trim() || undefined,
+      identityFocus: identityFocus.trim() || undefined,
+      reminderTime: reminderEnabled ? reminderTime : null,
+      reminderEnabled,
     });
 
     // Reset Form
@@ -47,6 +55,10 @@ export default function HabitCreator({ onAddHabit }: HabitCreatorProps) {
     setCategory("health");
     setDifficulty("easy");
     setFrequency("daily");
+    setHabitStackAnchor("");
+    setIdentityFocus("");
+    setReminderTime("08:00");
+    setReminderEnabled(false);
     setError(null);
     setIsOpen(false);
   };
@@ -187,6 +199,88 @@ export default function HabitCreator({ onAddHabit }: HabitCreatorProps) {
                       <option value="daily">Daily Habit</option>
                       <option value="weekly">Weekly Habit</option>
                     </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* --- James Clear's Atomic Habits Integration Section --- */}
+              <div className="border-t border-zinc-850 pt-4 mt-1">
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Sparkles className="h-4 w-4 text-orange-500" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">
+                    Atomic Formula & Cue Configuration
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Habit Stacking */}
+                  <div>
+                    <label className="block text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-wider mb-1">
+                      Law 1: Make It Obvious (Habit Stacking Cue)
+                    </label>
+                    <div className="flex items-center gap-1.5 bg-zinc-950 rounded-xl border border-zinc-850 px-3 py-2">
+                      <span className="text-[10px] text-zinc-500 font-mono font-bold uppercase shrink-0">After</span>
+                      <input
+                        type="text"
+                        placeholder="e.g. pouring my morning coffee"
+                        value={habitStackAnchor}
+                        onChange={(e) => setHabitStackAnchor(e.target.value)}
+                        className="w-full bg-transparent text-xs text-zinc-200 focus:outline-none placeholder-zinc-750"
+                      />
+                      <span className="text-[10px] text-zinc-500 font-mono font-bold uppercase shrink-0">, I will</span>
+                    </div>
+                  </div>
+
+                  {/* Identity Focus */}
+                  <div>
+                    <label className="block text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-wider mb-1">
+                      Identity Shift (Who do you wish to become?)
+                    </label>
+                    <div className="flex items-center gap-1.5 bg-zinc-950 rounded-xl border border-zinc-850 px-3 py-2">
+                      <User2 className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
+                      <span className="text-[10px] text-zinc-500 font-mono font-bold uppercase shrink-0">I am a/an</span>
+                      <input
+                        type="text"
+                        placeholder="e.g. focused programmer / clean athlete"
+                        value={identityFocus}
+                        onChange={(e) => setIdentityFocus(e.target.value)}
+                        className="w-full bg-transparent text-xs text-zinc-200 focus:outline-none placeholder-zinc-750"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Daily Reminders */}
+                <div className="mt-4 p-4 rounded-xl bg-zinc-950 border border-zinc-850/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <Bell className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold text-zinc-300">Daily Browser Cue Alarm</p>
+                      <p className="text-[10px] text-zinc-500 font-mono leading-tight uppercase tracking-wider mt-0.5">
+                        Triggers in-app synth chime & browser alert notifications
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 self-end sm:self-center">
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-zinc-400 select-none">
+                      <input
+                        type="checkbox"
+                        checked={reminderEnabled}
+                        onChange={(e) => setReminderEnabled(e.target.checked)}
+                        className="rounded border-zinc-800 bg-zinc-900 text-orange-500 focus:ring-0 cursor-pointer"
+                      />
+                      <span>Enable Alarm</span>
+                    </label>
+
+                    {reminderEnabled && (
+                      <input
+                        type="time"
+                        value={reminderTime}
+                        onChange={(e) => setReminderTime(e.target.value)}
+                        className="rounded-lg bg-zinc-900 border border-zinc-800 px-2 py-1.5 text-xs text-zinc-200 font-mono focus:outline-none focus:border-orange-500 cursor-pointer"
+                      />
+                    )}
                   </div>
                 </div>
               </div>

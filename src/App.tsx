@@ -28,7 +28,8 @@ import {
   Activity,
   Archive,
   Menu,
-  X
+  X,
+  Bell
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -427,6 +428,131 @@ export default function App() {
       }
     }
   };
+
+  // --- Update Existing Habit Settings (Reminders, Stacking, Cues) ---
+  const handleUpdateHabit = async (habitId: string, updates: Partial<Habit>) => {
+    const updatedHabits = habits.map((h) => {
+      if (h.id === habitId) {
+        return { ...h, ...updates };
+      }
+      return h;
+    });
+    setHabits(updatedHabits);
+    await saveAll(updatedHabits, stats, quests, badges, avatar, archivedHabits);
+
+    if (currentUser && currentUser.uid !== "guest-user-session") {
+      try {
+        const targetHabit = updatedHabits.find((h) => h.id === habitId);
+        if (targetHabit) {
+          await setDoc(doc(db, "users", currentUser.uid, "habits", habitId), targetHabit);
+        }
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.uid}/habits/${habitId}`);
+      }
+    }
+  };
+
+  // --- Daily Reminders Alert System (Law 1: Make It Obvious) ---
+  const [reminderToasts, setReminderToasts] = useState<Array<{ id: string; habitId: string; habitName: string; time: string }>>([]);
+
+  const handleCompleteFromReminder = (habitId: string) => {
+    // Dismiss active toast
+    setReminderToasts((prev) => prev.filter((t) => t.habitId !== habitId));
+    // Complete habit with standard handlers
+    handleCompleteHabit(habitId);
+  };
+
+  useEffect(() => {
+    const playCueSound = () => {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContextClass) return;
+        const ctx = new AudioContextClass();
+        
+        // Tone 1: Obvious starting chime
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+        gain1.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+        
+        osc1.start();
+        osc1.stop(ctx.currentTime + 0.35);
+
+        // Tone 2: Satisfying secondary chime shortly after
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          
+          osc2.type = "sine";
+          osc2.frequency.setValueAtTime(880, ctx.currentTime); // A5
+          gain2.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          
+          osc2.start();
+          osc2.stop(ctx.currentTime + 0.5);
+        }, 150);
+        
+      } catch (err) {
+        console.warn("Web Audio API not allowed yet by browser interaction policy.", err);
+      }
+    };
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const todayStr = now.toLocaleDateString("en-CA"); // "YYYY-MM-DD"
+      
+      const hrs = String(now.getHours()).padStart(2, "0");
+      const mins = String(now.getMinutes()).padStart(2, "0");
+      const timeStr = `${hrs}:${mins}`;
+
+      const triggeredJson = localStorage.getItem("atomic_triggered_alarms");
+      const triggered: Record<string, string> = triggeredJson ? JSON.parse(triggeredJson) : {};
+      let updated = false;
+
+      habits.forEach((habit) => {
+        if (habit.reminderEnabled && habit.reminderTime === timeStr) {
+          const isCompletedToday = habit.lastCompletedDate === todayStr;
+          const isTriggeredToday = triggered[habit.id] === todayStr;
+
+          if (!isCompletedToday && !isTriggeredToday) {
+            triggered[habit.id] = todayStr;
+            updated = true;
+
+            setReminderToasts((prev) => [
+              ...prev.filter((t) => t.habitId !== habit.id),
+              {
+                id: `reminder-${habit.id}-${Date.now()}`,
+                habitId: habit.id,
+                habitName: habit.name,
+                time: habit.reminderTime || "08:00"
+              }
+            ]);
+
+            playCueSound();
+
+            if ("Notification" in window && Notification.permission === "granted") {
+              new Notification("⚡ Atomic OS Cue Triggered", {
+                body: `It's time to execute your atomic habit: "${habit.name}"!`,
+              });
+            }
+          }
+        }
+      });
+
+      if (updated) {
+        localStorage.setItem("atomic_triggered_alarms", JSON.stringify(triggered));
+      }
+    }, 15000); // Check every 15s
+
+    return () => clearInterval(interval);
+  }, [habits]);
 
   // --- Quest Progress Evaluator ---
   const updateQuestMetrics = (
@@ -995,6 +1121,7 @@ export default function App() {
                             onComplete={handleCompleteHabit}
                             onGenerateBadge={handleGenerateBadge}
                             onAddBadgeToAlbum={handleAddBadgeToAlbum}
+                            onUpdateHabit={handleUpdateHabit}
                           />
                         </motion.div>
                       ))
@@ -1241,6 +1368,59 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Floating Obvious Cue Daily Reminder Alarms Toast Overlay */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+        <AnimatePresence>
+          {reminderToasts.map((toast) => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.15 } }}
+              className="pointer-events-auto flex flex-col p-4 rounded-xl border border-orange-500/80 bg-zinc-950 shadow-[0_0_20px_rgba(249,115,22,0.15)] text-zinc-100 relative overflow-hidden"
+            >
+              {/* Decorative scanline overlay */}
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(249,115,22,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none" />
+              
+              <div className="flex items-start gap-2.5 relative z-10">
+                <Bell className="h-5 w-5 text-orange-500 animate-bounce shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-orange-400">
+                      ⚡ Cue Triggered
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-500 font-bold">{toast.time}</span>
+                  </div>
+                  <h4 className="font-display font-bold text-xs uppercase tracking-wider text-zinc-100 mt-1">
+                    {toast.habitName}
+                  </h4>
+                  <p className="text-[10px] font-mono text-zinc-400 mt-1 leading-normal uppercase">
+                    James Clear says: "Make it obvious!" Your daily cue is active. Complete it now.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 mt-3.5 relative z-10">
+                <button
+                  type="button"
+                  onClick={() => setReminderToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+                  className="rounded-lg border border-zinc-850 bg-zinc-900 px-2.5 py-1 text-[9px] font-mono font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer uppercase tracking-wider"
+                >
+                  Postpone
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCompleteFromReminder(toast.habitId)}
+                  className="rounded-lg bg-orange-500 text-zinc-950 px-3 py-1 text-[9px] font-display font-black transition-all hover:bg-orange-400 cursor-pointer uppercase tracking-wider shadow-sm shadow-orange-500/20"
+                >
+                  Execute Habit
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
 
     </div>
   );

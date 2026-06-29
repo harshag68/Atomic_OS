@@ -11,6 +11,12 @@ export interface Habit {
   frequency: "daily" | "weekly";
   lastCompletedDate: string | null; // "YYYY-MM-DD"
   history: string[]; // List of completed dates
+  // --- Atomic Habits Concepts (James Clear) ---
+  habitStackAnchor?: string; // Anchor cue: "After [anchor], I will..."
+  identityFocus?: string; // Identity goal: "Shapes my identity as a [writer/athlete]"
+  // --- Daily Reminders ---
+  reminderTime?: string | null; // "HH:MM" local format
+  reminderEnabled?: boolean;
 }
 
 export interface Badge {

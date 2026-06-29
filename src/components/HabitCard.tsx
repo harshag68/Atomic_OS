@@ -15,7 +15,9 @@ import {
   AlertCircle, 
   ChevronDown, 
   ChevronUp,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Bell,
+  User2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -24,13 +26,15 @@ interface HabitCardProps {
   onComplete: (habitId: string, verificationResult?: VerificationResult, mood?: string, timeSpent?: number) => void;
   onGenerateBadge: (habitName: string, streak: number) => Promise<{ imageUrl: string; promptUsed: string }>;
   onAddBadgeToAlbum: (badge: { habitName: string; imageUrl: string; promptUsed: string; streakMilestone: number }) => void;
+  onUpdateHabit?: (habitId: string, updates: Partial<Habit>) => void;
 }
 
 export default function HabitCard({ 
   habit, 
   onComplete, 
   onGenerateBadge, 
-  onAddBadgeToAlbum 
+  onAddBadgeToAlbum,
+  onUpdateHabit
 }: HabitCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -244,6 +248,24 @@ export default function HabitCard({
               {habit.description}
             </p>
 
+            {/* Atomic Habits: Stacking & Identity Visual Cues */}
+            {(habit.habitStackAnchor || habit.identityFocus) && (
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {habit.habitStackAnchor && (
+                  <div className="text-[9px] font-mono leading-relaxed bg-orange-500/5 text-orange-400 px-2 py-1 rounded-lg border border-orange-500/10 inline-flex items-center gap-1 uppercase tracking-wider">
+                    <span className="font-bold text-orange-500/60">STALKING CUE:</span>
+                    <span>After <strong className="text-zinc-200">{habit.habitStackAnchor}</strong>, I will <strong className="text-zinc-100">{habit.name}</strong></span>
+                  </div>
+                )}
+                {habit.identityFocus && (
+                  <div className="text-[9px] font-mono leading-relaxed bg-zinc-950 text-zinc-400 px-2 py-1 rounded-lg border border-zinc-850 inline-flex items-center gap-1 uppercase tracking-wider">
+                    <User2 className="h-3 w-3 text-zinc-500 shrink-0" />
+                    <span>Identity: <strong className="text-zinc-200">{habit.identityFocus}</strong></span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {!isCompletedToday && (
               <div className="mt-3.5 flex flex-wrap gap-4 items-center border-t border-zinc-850/60 pt-3 text-xs text-zinc-400">
                 <div className="flex items-center gap-2">
@@ -293,6 +315,50 @@ export default function HabitCard({
                 </div>
               </div>
             )}
+
+            {/* Law 1: Daily Reminder / Cue Trigger setup */}
+            <div className="mt-3.5 flex flex-wrap items-center gap-2.5 border-t border-zinc-850/40 pt-3 text-[10px] text-zinc-500">
+              <div className="flex items-center gap-1.5">
+                <Bell className={`h-3.5 w-3.5 ${habit.reminderEnabled ? "text-orange-500 animate-pulse" : "text-zinc-600"}`} />
+                <span className="font-mono font-bold uppercase tracking-wider text-zinc-500">OBVIOUS CUE ALARM:</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onUpdateHabit) {
+                      onUpdateHabit(habit.id, {
+                        reminderEnabled: !habit.reminderEnabled,
+                        reminderTime: habit.reminderTime || "08:00"
+                      });
+                    }
+                  }}
+                  className={`px-2 py-0.5 rounded font-mono font-bold text-[9px] uppercase transition-all cursor-pointer ${
+                    habit.reminderEnabled
+                      ? "bg-orange-500/15 text-orange-400 border border-orange-500/30"
+                      : "bg-zinc-950 border border-zinc-850 text-zinc-600 hover:text-zinc-450"
+                  }`}
+                >
+                  {habit.reminderEnabled ? "Alarm ON" : "Alarm OFF"}
+                </button>
+
+                {habit.reminderEnabled && (
+                  <input
+                    type="time"
+                    value={habit.reminderTime || "08:00"}
+                    onChange={(e) => {
+                      if (onUpdateHabit) {
+                        onUpdateHabit(habit.id, {
+                          reminderTime: e.target.value
+                        });
+                      }
+                    }}
+                    className="bg-zinc-950 border border-zinc-850 rounded px-1.5 py-0.5 text-[10px] font-mono text-zinc-300 focus:outline-none focus:border-orange-500 cursor-pointer"
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
